@@ -47,7 +47,7 @@ func SRHUdp(conn *net.UDPConn, addr *net.UDPAddr, requisition []byte) {
 	}
 }
 
-func main() {
+func Server() {
 	requisition := make([]byte, 2048)
 	addr := net.UDPAddr{
 			Port: 42585,

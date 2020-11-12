@@ -49,7 +49,7 @@ func sendRecieveMessage(connection int,operation int, candidate int) {
 	}
 }
 
-func main() {
+func Client() {
 	var operation int
 	var connection int 
 	var candidate int
