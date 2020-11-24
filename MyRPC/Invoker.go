@@ -1,13 +1,10 @@
 package MyRPC
 
-// import (
-// 	"fmt"
-// 	"io/ioutil"
-// 	"net"
-// )
+//Invoker ->
+type Invoker interface {
+	Invoke(message []byte) ([]byte, error)
+}
 
-//Client Request Handler
-//Server Request Handler
 //Absolute Object Reference (AOR)
 //Client Proxy
 //Requestor
