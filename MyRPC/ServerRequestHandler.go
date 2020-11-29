@@ -47,7 +47,7 @@ func (srh ServerRequestHandlerTCP) Listen() {
 	for !srh.close {
 		conn, err := srh.listener.AcceptTCP()
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
 		go srh.Handle(conn)
 	}

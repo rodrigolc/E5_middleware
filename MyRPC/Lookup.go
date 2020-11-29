@@ -68,9 +68,13 @@ func (lookup *LookUp) CreateReference(address string, id uint) AbsoluteObjectRef
 }
 
 func (lookup *LookUp) Init(address string) (LookUpInvoker, error) {
+
 	if lookup == nil {
 		lookup = new(LookUp)
 		lookup.Services = nil
+		lookup.SRH = ServerRequestHandlerTCP{}
+	}
+	if lookup.SRH == nil {
 		lookup.SRH = ServerRequestHandlerTCP{}
 	}
 	if lookup.Services == nil {
@@ -79,9 +83,8 @@ func (lookup *LookUp) Init(address string) (LookUpInvoker, error) {
 	lookup.Register("Lookup", lookup.CreateReference(address, 1))
 	var inv Invoker = LookUpInvoker{lookup}
 	lookup.SRH.SetUp(&inv, address)
-	println("UHUL")
+
 	lookup.SRH.Listen()
-	println("UHUL")
 	return inv.(LookUpInvoker), nil
 }
 
