@@ -30,11 +30,11 @@ func (crh ClientRequestHandlerTCP) SendReceive(message []byte) ([]byte, error) {
 	conn.Close()
 	return response, err
 }
-func (crh ClientRequestHandlerTCP) SetUp(addr string) (*ClientRequestHandlerTCP, error) {
+func (crh ClientRequestHandlerTCP) SetUp(addr string) (ClientRequestHandler, error) {
 	serverAddr, err := net.ResolveTCPAddr("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
 	crh.ServerAddr = serverAddr
-	return &crh, err
+	return crh, err
 }

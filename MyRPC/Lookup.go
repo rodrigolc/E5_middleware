@@ -149,7 +149,9 @@ type LookUpProxy struct {
 }
 
 func (lookup *LookUpProxy) New(address string) *LookUpProxy {
-	*lookup = LookUpProxy{lookup.CreateReference(address, 1), Requestor{}} //ID fixo do lookup
+	aor := lookup.CreateReference(address, 1)
+	*lookup = LookUpProxy{aor, Requestor{}} //ID fixo do lookup
+	lookup.Requestor.CRH = ClientRequestHandlerTCP{}
 	return lookup
 }
 
