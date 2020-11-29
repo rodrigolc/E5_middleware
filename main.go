@@ -2,5 +2,5 @@ package main
 
 func main() {
 	go Server()
-	Client()
+	go Client()
 }

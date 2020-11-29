@@ -6,8 +6,8 @@ type Requestor struct {
 }
 
 type Call struct {
-	method string
-	args   []interface{}
+	Method string
+	Args   []interface{}
 }
 
 type Invocation struct {

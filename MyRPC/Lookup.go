@@ -94,21 +94,21 @@ func (inv LookUpInvoker) Invoke(message []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	switch op.call.method {
+	switch op.call.Method {
 	case "Register":
-		aor, err := (*inv.lookup).Register(op.call.args[0].(string), op.aor)
+		aor, err := (*inv.lookup).Register(op.call.Args[0].(string), op.aor)
 		if err != nil {
 			return nil, err
 		}
 		return m.Marshal(aor)
 	case "Remove":
-		err := (*inv.lookup).Remove(op.call.args[0].(string))
+		err := (*inv.lookup).Remove(op.call.Args[0].(string))
 		if err != nil {
 			return nil, err
 		}
 		return nil, nil //parece errado, mas é isso mesmo
 	case "LookUp":
-		aor, err := (*inv.lookup).LookUp(op.call.args[0].(string))
+		aor, err := (*inv.lookup).LookUp(op.call.Args[0].(string))
 		if err != nil {
 			return nil, errors.New("Servico nao encontrado.")
 		}
@@ -127,6 +127,11 @@ func (inv LookUpInvoker) Invoke(message []byte) ([]byte, error) {
 type LookUpProxy struct {
 	aor       AbsoluteObjectReference
 	requestor Requestor
+}
+
+func (l *LookUpProxy) New(address string) *LookUpProxy {
+	lp := LookUpProxy{l.CreateReference(address, 1), Requestor{}}
+	return &lp
 }
 
 func (e *LookUpProxy) Register(serviceName string, reference AbsoluteObjectReference) (AbsoluteObjectReference, error) {

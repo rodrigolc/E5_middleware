@@ -37,7 +37,10 @@ func Server() {
 	echo := Echo{}
 
 	echoAddress := "localhost:5555"
-	lookup := Lookup
-	aor := MyRPC.LookUp.CreateReference(echoAddress, 1)
+	lookupAddress := "localhost:4444"
+
+	var lookup MyRPC.LookUp = MyRPC.LookUp{}
+	aor := lookup.CreateReference(echoAddress, 1)
+
 	aor, err := lookup.Register("Echo", aor)
 }
