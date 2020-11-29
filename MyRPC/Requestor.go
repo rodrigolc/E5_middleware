@@ -2,7 +2,7 @@ package MyRPC
 
 //Requestor
 type Requestor struct {
-	crh ClientRequestHandler
+	CRH ClientRequestHandler
 }
 
 type Call struct {
@@ -11,14 +11,14 @@ type Call struct {
 }
 
 type Invocation struct {
-	aor  AbsoluteObjectReference
-	call Call
+	AOR  AbsoluteObjectReference
+	Call Call
 }
 
 func (r *Requestor) Request(invocation Invocation) ([]interface{}, error) {
 	var err error
 	m := Marshaller{}
-	r.crh, err = r.crh.SetUp(invocation.aor.address)
+	r.CRH, err = r.CRH.SetUp(invocation.AOR.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func (r *Requestor) Request(invocation Invocation) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	response, err := r.crh.SendReceive(data)
+	response, err := r.CRH.SendReceive(data)
 	if err != nil {
 		return nil, err
 	}
