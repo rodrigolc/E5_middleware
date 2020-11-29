@@ -1,18 +1,24 @@
 package main
 
 import (
+	"fmt"
+
 	"./MyRPC"
 )
 
 func Client() {
-	lookup, err := MyRPC.GetLookUp("localhost:5555")
+	//echoAddress := "localhost:5555" //deve achar pelo lookup
+	lookupAddress := "localhost:4444"
+	fmt.Println("Oi")
+	lookupProxy := MyRPC.LookUpProxy{}
+	lookupProxy.New(lookupAddress)
+	fmt.Println("Oi")
+	echoAOR, err := lookupProxy.LookUp("Echo")
 	if err != nil {
-		panic(err)
+		fmt.Println("errooo")
 	}
-
-	var echoer Echoer = lookup.LookUp("Echo")
-	if err != nil {
-		panic(1)
-	}
+	echo := EchoProxy{}
+	echo.New(echoAOR)
+	fmt.Println("Oi", echo.ReverseEcho("Oi"))
 
 }

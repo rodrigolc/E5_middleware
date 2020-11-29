@@ -32,6 +32,11 @@ type EchoProxy struct {
 	Requestor MyRPC.Requestor
 }
 
+func (echo *EchoProxy) New(aor MyRPC.AbsoluteObjectReference) *EchoProxy {
+	*echo = EchoProxy{aor, MyRPC.Requestor{}} //ID fixo do Echo
+	return echo
+}
+
 func (e *EchoProxy) Echo(line string) string {
 	call := MyRPC.Call{"Echo", []interface{}{line}}
 	newInv := MyRPC.Invocation{e.AOR, call}
@@ -54,6 +59,7 @@ func (e *EchoProxy) ReverseEcho(line string) string {
 
 type EchoInvoker struct {
 	Echo *Echo
+	SRH  *MyRPC.ServerRequestHandler
 }
 
 func (inv EchoInvoker) Invoke(message []byte) ([]byte, error) {
@@ -82,7 +88,13 @@ func Server() {
 	echo := Echo{}
 	var lookup MyRPC.LookUp = MyRPC.LookUp{}
 	go lookup.Init(lookupAddress)
-	aor := lookup.CreateReference(echoAddress, 3)
+	lookupProxy := MyRPC.LookUpProxy{}
+	lookupProxy.New(lookupAddress)
+	lookupProxy.Register("Echo", lookupProxy.CreateReference(echoAddress, 1))
+	var srh MyRPC.ServerRequestHandler = MyRPC.ServerRequestHandlerTCP{}
+	var inv MyRPC.Invoker = EchoInvoker{&echo, &srh}
+	srh.SetUp(&inv, echoAddress)
 
-	aor, err := lookup.Register("Echo", aor)
+	srh.Listen()
+
 }

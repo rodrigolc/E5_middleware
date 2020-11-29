@@ -149,8 +149,8 @@ type LookUpProxy struct {
 }
 
 func (lookup *LookUpProxy) New(address string) *LookUpProxy {
-	lp := LookUpProxy{lookup.CreateReference(address, 1), Requestor{}}
-	return &lp
+	*lookup = LookUpProxy{lookup.CreateReference(address, 1), Requestor{}} //ID fixo do lookup
+	return lookup
 }
 
 func (lookup *LookUpProxy) Register(serviceName string, reference AbsoluteObjectReference) (AbsoluteObjectReference, error) {
