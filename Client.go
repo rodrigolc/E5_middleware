@@ -7,8 +7,8 @@ import (
 )
 
 func Client() {
-	//echoAddress := "localhost:5555" //deve achar pelo lookup
-	lookupAddress := "localhost:4444"
+	//echoAddress := "127.0.0.1:5555" //deve achar pelo lookup
+	lookupAddress := "127.0.0.1:4146"
 	fmt.Println("Oi")
 	lookupProxy := MyRPC.LookUpProxy{}
 	lookupProxy.New(lookupAddress)

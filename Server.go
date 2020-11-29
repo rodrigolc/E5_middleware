@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 
 	"./MyRPC"
 )
@@ -42,7 +43,7 @@ func (e *EchoProxy) Echo(line string) string {
 	newInv := MyRPC.Invocation{e.AOR, call}
 	newLine, err := e.Requestor.Request(newInv)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	return newLine[0].(string)
 }
@@ -52,7 +53,7 @@ func (e *EchoProxy) ReverseEcho(line string) string {
 	newInv := MyRPC.Invocation{e.AOR, call}
 	newLine, err := e.Requestor.Request(newInv)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	return newLine[0].(string)
 }
@@ -81,13 +82,16 @@ func (inv EchoInvoker) Invoke(message []byte) ([]byte, error) {
 		return nil, errors.New("Operação não reconhecida")
 	}
 }
-
-func Server() {
-	echoAddress := "localhost:5555"
-	lookupAddress := "localhost:4444"
-	echo := Echo{}
+func LookupServer() {
+	lookupAddress := "127.0.0.1:4146"
 	var lookup MyRPC.LookUp = MyRPC.LookUp{}
-	go lookup.Init(lookupAddress)
+	lookup.Init(lookupAddress)
+}
+func Server() {
+	echoAddress := "127.0.0.1:5555"
+	lookupAddress := "127.0.0.1:4146"
+	echo := Echo{}
+	go LookupServer()
 	lookupProxy := MyRPC.LookUpProxy{}
 	lookupProxy.New(lookupAddress)
 	lookupProxy.Register("Echo", lookupProxy.CreateReference(echoAddress, 1))

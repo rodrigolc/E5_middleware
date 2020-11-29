@@ -2,6 +2,7 @@ package MyRPC
 
 import (
 	"errors"
+	"fmt"
 )
 
 type AbsoluteObjectReference struct {
@@ -82,10 +83,13 @@ func (lookup *LookUp) Init(address string) (LookUpInvoker, error) {
 	}
 	lookup.Register("Lookup", lookup.CreateReference(address, 1))
 	var inv Invoker = LookUpInvoker{lookup}
-	lookup.SRH.SetUp(&inv, address)
-
+	var err error
+	lookup.SRH, err = lookup.SRH.SetUp(&inv, address)
+	if err != nil {
+		panic(err)
+	}
 	lookup.SRH.Listen()
-	return inv.(LookUpInvoker), nil
+	return inv.(LookUpInvoker), err
 }
 
 func (lookup *LookUp) Stop() error {
@@ -126,13 +130,13 @@ func (inv LookUpInvoker) Invoke(message []byte) ([]byte, error) {
 	case "LookUp":
 		aor, err := (*inv.Lookup).LookUp(op.Call.Args[0].(string))
 		if err != nil {
-			return nil, errors.New("servico nao encontrado")
+			return nil, err
 		}
 		return m.Marshal(aor)
 	case "List":
 		aors, err := (*inv.Lookup).List()
 		if err != nil {
-			return nil, errors.New("nenhum servico encontrado")
+			return nil, err
 		}
 		return m.Marshal(aors)
 	case "CreateReference":
@@ -164,7 +168,7 @@ func (lookup *LookUpProxy) Register(serviceName string, reference AbsoluteObject
 	newInv := Invocation{lookup.AOR, call}
 	ret, err := lookup.Requestor.Request(newInv)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	return ret[0].(AbsoluteObjectReference), nil
 }
@@ -175,7 +179,7 @@ func (lookup *LookUpProxy) Remove(serviceName string) error {
 	newInv := Invocation{lookup.AOR, call}
 	_, err := lookup.Requestor.Request(newInv)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	return nil
 }
@@ -186,7 +190,7 @@ func (lookup *LookUpProxy) LookUp(serviceName string) (AbsoluteObjectReference, 
 	newInv := Invocation{lookup.AOR, call}
 	newLine, err := lookup.Requestor.Request(newInv)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	return newLine[0].(AbsoluteObjectReference), nil
 }
@@ -196,7 +200,7 @@ func (lookup *LookUpProxy) List() ([]string, error) {
 	newInv := Invocation{lookup.AOR, call}
 	newLine, err := lookup.Requestor.Request(newInv)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	ret := make([]string, len(newLine))
 	for i, s := range newLine {
@@ -211,9 +215,9 @@ func (lookup *LookUpProxy) CreateReference(address string, id uint) AbsoluteObje
 }
 
 func (lookup *LookUpProxy) Init(address string) (LookUpInvoker, error) {
-	panic(errors.New("init() não pode ser chamado pelo cliente"))
+	return LookUpInvoker{}, errors.New("init() não pode ser chamado pelo cliente")
 }
 
 func (lookup *LookUpProxy) Stop() error {
-	panic(errors.New("Stop() não pode ser chamado pelo cliente"))
+	return errors.New("Stop() não pode ser chamado pelo cliente")
 }

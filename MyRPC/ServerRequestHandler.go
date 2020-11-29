@@ -1,7 +1,6 @@
 package MyRPC
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -45,26 +44,36 @@ func (srh ServerRequestHandlerTCP) TearDown() {
 
 func (srh ServerRequestHandlerTCP) Listen() {
 	for !srh.close {
+		fmt.Println("listen1")
+
 		conn, err := srh.listener.AcceptTCP()
+		fmt.Println("listen2")
 		if err != nil {
 			fmt.Println(err)
+			panic(err)
 		}
+		fmt.Println("conn?", conn)
+
 		go srh.Handle(conn)
 	}
 }
 func (srh ServerRequestHandlerTCP) Handle(conn net.Conn) {
+	fmt.Println("handle1", conn)
+
 	message, err := ioutil.ReadAll(conn)
+	fmt.Println("handle2", conn)
+
 	if err != nil {
-		panic(errors.New("Erro lendo no Handle"))
+		fmt.Println(err)
 	}
 	message, err = (*srh.invoker).Invoke(message)
 	if err != nil {
-		panic(errors.New("Erro no Invoke()"))
+		fmt.Println(err)
 	}
 
-	l, err := srh.Send(conn, message)
+	_, err = srh.Send(conn, message)
 	if err != nil {
-		panic(errors.New(fmt.Sprintf("Erro no Send() - numero %d", l)))
+		fmt.Println(err)
 	}
 	conn.Close()
 }
