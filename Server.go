@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+
 	"./MyRPC"
 )
 
@@ -50,13 +52,37 @@ func (e *EchoProxy) ReverseEcho(line string) string {
 	return newLine[0].(string)
 }
 
+type EchoInvoker struct {
+	Echo *Echo
+}
+
+func (inv EchoInvoker) Invoke(message []byte) ([]byte, error) {
+	m := MyRPC.Marshaller{}
+	op := MyRPC.Invocation{}
+	err := m.Unmarshal(message, &op)
+	if err != nil {
+		return nil, err
+	}
+
+	switch op.Call.Method {
+	case "Echo":
+		ech := (*inv.Echo).Echo(op.Call.Args[0].(string))
+		return m.Marshal(ech)
+	case "ReverseEcho":
+		rev := (*inv.Echo).ReverseEcho(op.Call.Args[0].(string))
+		return m.Marshal(rev) //parece errado, mas é isso mesmo
+	default:
+		return nil, errors.New("Operação não reconhecida")
+	}
+}
+
 func Server() {
 	echoAddress := "localhost:5555"
 	lookupAddress := "localhost:4444"
 	echo := Echo{}
 	var lookup MyRPC.LookUp = MyRPC.LookUp{}
 	go lookup.Init(lookupAddress)
-	aor := lookup.CreateReference(echoAddress, 1)
+	aor := lookup.CreateReference(echoAddress, 3)
 
 	aor, err := lookup.Register("Echo", aor)
 }

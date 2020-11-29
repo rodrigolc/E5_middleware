@@ -15,6 +15,10 @@ type Invocation struct {
 	Call Call
 }
 
+func (r *Requestor) Init() {
+
+}
+
 func (r *Requestor) Request(invocation Invocation) ([]interface{}, error) {
 	var err error
 	m := Marshaller{}

@@ -5,12 +5,19 @@ package MyRPC
 // 	"io/ioutil"
 // 	"net"
 // )
+type MyRPC struct {
+	lookup LookUper
+}
 
-//Client Request Handler
-//Server Request Handler
-//Absolute Object Reference (AOR)
-//Client Proxy
-//Requestor
-//Marshaller
-//Invoker
-//Lookup
+func (m *MyRPC) GetLookUp() LookUpProxy {
+	return LookUpProxy{}
+}
+
+//Client Request Handler -> "MyRPC/ClientRequestHandler.go"
+//Server Request Handler -> "MyRPC/ClientRequestHandler.go"
+//Absolute Object Reference (AOR)  -> "MyRPC/ClientRequestHandler.go"
+//Client Proxy  -> "MyRPC/ClientRequestHandler.go"
+//Requestor -> "MyRPC/Requestor.go"
+//Marshaller -> "MyRPC/Marshaller.go"
+//Invoker -> "MyRPC/Invoker.go"
+//Lookup -> "MyRPC/LookUp.go"
