@@ -19,6 +19,10 @@ func Client() {
 	}
 	echo := EchoProxy{}
 	echo.New(echoAOR)
-	fmt.Println("Oi", echo.ReverseEcho("Oi"))
+	for i := 0; i < 20; i++ {
+		mess := fmt.Sprint("oi ", i)
+		fmt.Println(mess, echo.Echo(mess))
+		fmt.Println(mess, echo.ReverseEcho(mess))
+	}
 
 }

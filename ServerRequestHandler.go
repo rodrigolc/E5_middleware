@@ -60,13 +60,13 @@ func (srh ServerRequestHandlerTCP) Listen() {
 			fmt.Println(err)
 			panic(err)
 		}
-		// fmt.Println("conn?", conn)
+		fmt.Println("conn?", conn)
 
 		go srh.Handle(conn)
 	}
 }
 func (srh ServerRequestHandlerTCP) Handle(conn net.Conn) {
-
+	
 	//println("SRH! Handle! Message? readall")
 	message, err := ioutil.ReadAll(conn)
 	//println("SRH! Handle! Message!", string(message), err)

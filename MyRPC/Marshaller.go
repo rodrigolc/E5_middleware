@@ -7,9 +7,9 @@ import (
 //Marshaller
 type Marshaller struct{}
 
-func (m *Marshaller) Marshal(obj interface{}) ([]byte, error) {
-	return json.Marshal(obj)
+func (m *Marshaller) Marshal(v interface{}) ([]byte, error) {
+	return json.Marshal(v)
 }
-func (m *Marshaller) Unmarshal(data []byte, pointer interface{}) error {
-	return json.Unmarshal(data, pointer)
+func (m *Marshaller) Unmarshal(data []byte, v interface{}) error {
+	return json.Unmarshal(data, v)
 }

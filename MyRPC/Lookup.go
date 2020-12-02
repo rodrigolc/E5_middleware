@@ -7,7 +7,7 @@ import (
 
 type AbsoluteObjectReference struct {
 	Address string
-	ID      uint
+	ID      string
 }
 
 //interface do LookUp
@@ -27,11 +27,16 @@ type LookUp struct {
 }
 
 func (lookup *LookUp) Register(serviceName string, reference AbsoluteObjectReference) (AbsoluteObjectReference, error) {
+	//println("lookup! register! string:", serviceName, " Address: ", reference.Address, "-", reference.ID)
 	aor, achou := lookup.Services[serviceName]
+
 	if achou {
+		//println("lookup! register! string:", serviceName, " found!: ", aor.Address, "-", aor.ID)
 		return aor, errors.New("Já tem servico com o nome")
 	}
+	//println("lookup! register! string:", serviceName, " not found, go on.")
 	lookup.Services[serviceName] = reference
+	//println("lookup! register! string:", serviceName, " registered: ", reference.Address, "-", reference.ID)
 	return reference, nil
 }
 func (lookup *LookUp) Remove(serviceName string) error {
@@ -64,7 +69,7 @@ func (lookup *LookUp) List() ([]string, error) {
 	}
 	return keys, nil
 }
-func (lookup *LookUp) CreateReference(address string, id uint) AbsoluteObjectReference {
+func (lookup *LookUp) CreateReference(address string, id string) AbsoluteObjectReference {
 	return AbsoluteObjectReference{address, id}
 }
 
@@ -81,7 +86,7 @@ func (lookup *LookUp) Init(address string) (LookUpInvoker, error) {
 	if lookup.Services == nil {
 		lookup.Services = make(map[string]AbsoluteObjectReference)
 	}
-	lookup.Register("Lookup", lookup.CreateReference(address, 1))
+	lookup.Register("Lookup", lookup.CreateReference(address, "1"))
 	var inv Invoker = LookUpInvoker{lookup}
 	var err error
 	lookup.SRH, err = lookup.SRH.SetUp(&inv, address)
@@ -116,7 +121,9 @@ func (inv LookUpInvoker) Invoke(message []byte) ([]byte, error) {
 
 	switch op.Call.Method {
 	case "Register":
-		aor, err := (*inv.Lookup).Register(op.Call.Args[0].(string), op.AOR)
+		args := op.Call.Args[1].(map[string]interface{})
+		tAOR := AbsoluteObjectReference{args["Address"].(string), args["ID"].(string)}
+		aor, err := (*inv.Lookup).Register(op.Call.Args[0].(string), tAOR)
 		if err != nil {
 			return nil, err
 		}
@@ -156,21 +163,26 @@ type LookUpProxy struct {
 }
 
 func (lookup *LookUpProxy) New(address string) *LookUpProxy {
-	aor := lookup.CreateReference(address, 1)
+	aor := lookup.CreateReference(address, "1")
 	*lookup = LookUpProxy{aor, Requestor{}} //ID fixo do lookup
 	lookup.Requestor.CRH = ClientRequestHandlerTCP{}
 	return lookup
 }
 
 func (lookup *LookUpProxy) Register(serviceName string, reference AbsoluteObjectReference) (AbsoluteObjectReference, error) {
-
+	//println("lookup proxy! register?")
 	call := Call{"Register", []interface{}{serviceName, reference}}
 	newInv := Invocation{lookup.AOR, call}
+	//println("lookup proxy! register? request?")
 	ret, err := lookup.Requestor.Request(newInv)
+
+	//println("lookup proxy! register? request!", ret, err)
 	if err != nil {
+		//println("lookup proxy! register? request! error!!!", ret, err)
 		fmt.Println(err)
 	}
-	return ret[0].(AbsoluteObjectReference), nil
+	var aor map[string]interface{} = ret[0].(map[string]interface{})
+	return AbsoluteObjectReference{aor["Address"].(string), aor["ID"].(string)}, nil
 }
 
 func (lookup *LookUpProxy) Remove(serviceName string) error {
@@ -188,11 +200,12 @@ func (lookup *LookUpProxy) LookUp(serviceName string) (AbsoluteObjectReference, 
 
 	call := Call{"LookUp", []interface{}{serviceName}}
 	newInv := Invocation{lookup.AOR, call}
-	newLine, err := lookup.Requestor.Request(newInv)
+	ret, err := lookup.Requestor.Request(newInv)
 	if err != nil {
 		fmt.Println(err)
 	}
-	return newLine[0].(AbsoluteObjectReference), nil
+	var aor map[string]interface{} = ret[0].(map[string]interface{})
+	return AbsoluteObjectReference{aor["Address"].(string), aor["ID"].(string)}, nil
 }
 
 func (lookup *LookUpProxy) List() ([]string, error) {
@@ -210,7 +223,7 @@ func (lookup *LookUpProxy) List() ([]string, error) {
 }
 
 //retorna localmente.
-func (lookup *LookUpProxy) CreateReference(address string, id uint) AbsoluteObjectReference {
+func (lookup *LookUpProxy) CreateReference(address string, id string) AbsoluteObjectReference {
 	return AbsoluteObjectReference{address, id}
 }
 

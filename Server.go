@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"./MyRPC"
 )
@@ -34,7 +35,7 @@ type EchoProxy struct {
 }
 
 func (echo *EchoProxy) New(aor MyRPC.AbsoluteObjectReference) *EchoProxy {
-	*echo = EchoProxy{aor, MyRPC.Requestor{}} //ID fixo do Echo
+	*echo = EchoProxy{aor, MyRPC.Requestor{MyRPC.ClientRequestHandlerTCP{}}} //ID fixo do Echo
 	return echo
 }
 
@@ -83,22 +84,32 @@ func (inv EchoInvoker) Invoke(message []byte) ([]byte, error) {
 	}
 }
 func LookupServer() {
+	//println("lookup!")
 	lookupAddress := "127.0.0.1:4146"
 	var lookup MyRPC.LookUp = MyRPC.LookUp{}
+	//println("init?")
 	lookup.Init(lookupAddress)
 }
 func Server() {
 	echoAddress := "127.0.0.1:5555"
 	lookupAddress := "127.0.0.1:4146"
 	echo := Echo{}
+	var srh MyRPC.ServerRequestHandler = MyRPC.ServerRequestHandlerTCP{}
+	//println("SERVER! invoker?")
+	var inv MyRPC.Invoker = EchoInvoker{&echo, &srh}
+	//println("SERVER! invoker! setup?")
+	srh, _ = srh.SetUp(&inv, echoAddress)
+
+	//println("lookup?")
 	go LookupServer()
+	//println("lookup? wait 2")
+	time.Sleep(2 * time.Second)
+	//println("lookup? waited 2")
 	lookupProxy := MyRPC.LookUpProxy{}
 	lookupProxy.New(lookupAddress)
-	lookupProxy.Register("Echo", lookupProxy.CreateReference(echoAddress, 1))
-	var srh MyRPC.ServerRequestHandler = MyRPC.ServerRequestHandlerTCP{}
-	var inv MyRPC.Invoker = EchoInvoker{&echo, &srh}
-	srh.SetUp(&inv, echoAddress)
-
+	//println("SERVER! lookup? register?")
+	lookupProxy.Register("Echo", lookupProxy.CreateReference(echoAddress, "1"))
+	//println("SERVER! lookup! register!")
+	//println("SERVER! setup! listen?")
 	srh.Listen()
-
 }
